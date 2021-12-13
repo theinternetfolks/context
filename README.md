@@ -25,7 +25,7 @@ callFunction2(someData, originalData){
 
 callFunction3(originalData){
     // some unit of work here
-    callFunction3(originalData)
+    callFunction4(originalData)
 }
 
 callFunction4(originalData){
@@ -169,8 +169,9 @@ app.listen(3000, () => {
 - `get: <T>() => ICoreContextPayload<T>;`
   Method used to retrieve the data stored in the context.
 
-- `size: () => number;`
-  Method used to find the size of the Map.
+**Known Behavior:**
+
+As a side-effect of how the Async Hooks execution works,
 
 ## Authors
 
