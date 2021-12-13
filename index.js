@@ -82,4 +82,5 @@ var CoreContext = /** @class */ (function () {
     return CoreContext;
 }());
 exports.CoreContext = CoreContext;
+CoreContext.Loader();
 //# sourceMappingURL=index.js.map

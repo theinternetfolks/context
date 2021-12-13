@@ -97,3 +97,5 @@ export class CoreContext {
     return CoreContext.store.get(asyncId);
   };
 }
+
+CoreContext.Loader();

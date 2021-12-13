@@ -1,10 +1,6 @@
 import { CoreContext } from "../src";
 import { expect } from "chai";
 
-before(() => {
-  CoreContext.Loader();
-});
-
 /**
  * Positive Cases:
  * - should store data passed in store

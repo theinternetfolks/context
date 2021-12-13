@@ -2,6 +2,13 @@
 
 # @theinternetfolks/context
 
+[![GitHub license](https://img.shields.io/github/license/theinternetfolks/context.svg)](https://github.com/theinternetfolks/context/blob/master/LICENSE)
+[![GitHub latest commit](https://badgen.net/github/last-commit/theinternetfolks/context)](https://GitHub.com/theinternetfolks/context/commit/)
+[![Maintainer](https://img.shields.io/badge/maintainer-monkfromearth-green)](https://github.com/monkfromearth)
+[![made-with-javascript](https://img.shields.io/badge/Made%20with-JavaScript-1f425f.svg)](https://www.javascript.com)
+[![Npm package version](https://badgen.net/npm/v/@theinternetfolks/context)](https://npmjs.com/package/@theinternetfolks/context)
+[![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/theinternetfolks/context)
+
 Library to help you create a context that can be used to reference data, without prop drilling, in Node-based environments.
 
 The inspiration comes from the concept of [Context](https://reactjs.org/docs/context.html) in React.
@@ -89,9 +96,117 @@ Install with yarn
 
 ## Usage/Examples
 
-#### Example 1
+#### Example 2
+
+Simple usage in a simple function call based Node script.
+
+```javascript
+const { CoreContext } = require("@theinternetfolks/context");
+
+const SomeFunction = () => {
+  const context = CoreContext.get();
+  console.log(`Context Id: ${context.id}`);
+  console.log(`Name: ${context.data.name}`);
+};
+
+(() => {
+  CoreContext.create({ name: "The Internet Folks" }, "some-id");
+  SomeFunction();
+})();
+```
+
+**Output**:
+
+```bash
+Context Id: some-id
+Name: The Internet Folks
+```
+
+#### Example 2
+
+Simple Parent-Child function usage in a nested function call based Node script.
+
+```javascript
+const { CoreContext } = require("@theinternetfolks/context");
+
+const ChildFunction = () => {
+  const context = CoreContext.get();
+  console.log(`Context Id: ${context.id} in Child`);
+  console.log(`Name from Context: ${context.data.name} in Child`);
+};
+
+const ParentFunction = () => {
+  const context = CoreContext.get();
+  console.log(`Context Id: ${context.id} in Parent`);
+  ChildFunction();
+};
+
+(() => {
+  CoreContext.create({ name: "The Internet Folks" }, "some-id");
+  ParentFunction();
+})();
+```
+
+**Output**:
+
+```bash
+Context Id: some-id in Parent
+Context Id: some-id in Child
+Name from Context: The Internet Folks in Child
+```
+
+#### Example 3
 
 Usage in `Express.js` to create a per-request context.
+
+The data in the created context will **only** be accessible to that particular request.
+
+```javascript
+const express = require("express");
+
+const { CoreContext } = require("@theinternetfolks/context");
+
+// some example function calls
+const ChildFunction = async () => {
+  const context = CoreContext.get();
+
+  // Logs to the Id generated during creationg
+  console.log(context?.id);
+
+  // Use the data stored in the context
+  console.log(context?.data.host);
+};
+
+const ParentFunction = async () => {
+  const context = CoreContext.get();
+  ChildFunction();
+};
+
+// starting the express server
+const app = express();
+
+app.use(express.json());
+
+app.use("/", async (request, response, next) => {
+  CoreContext.create({ host: request.get("host") });
+  next();
+});
+
+app.get("/", (request, response) => {
+  const context = CoreContext.get();
+  ParentFunction();
+  return response.json(context?.id);
+});
+
+// starting the server
+app.listen(3000, () => {
+  console.log("Server running on port 3000");
+});
+```
+
+#### Example 4
+
+Usage in `Express.js` with Typescript (and interfaces) to create a per-request context.
 
 The data in the created context will **only** be accessible to that particular request.
 
@@ -99,9 +214,6 @@ The data in the created context will **only** be accessible to that particular r
 import express from "express";
 
 import { CoreContext } from "@theinternetfolks/context";
-
-// a one-time function call used to enable async hooks
-CoreContext.Loader();
 
 
 // some example function calls
@@ -162,23 +274,53 @@ app.listen(3000, () => {
 
 #### Table of Content
 
-- `store: Map<any, any>;`
-  The Map that stores all the data of the context.
-
-- `Loader(): void;`
-  Method used to call the first thing only once, to enable the library to work.
-
 - `create: <T>(data: T, id?: string) => ICoreContextPayload<T>;`
   Method used to create a context, and pass data to be stored.
 
 - `get: <T>() => ICoreContextPayload<T>;`
   Method used to retrieve the data stored in the context.
 
+**Internal variables and methods**
+
+These are handled internally by the library, and doesn't require your intervention.
+
+- `store: Map<any, any>;`
+  The Map that stores all the data of the context.
+
+- `Loader(): void;`
+  Method used to call the first thing only once, to enable the library to work.
+
 **Known Behavior**
 
-As a side-effect of how the Async Hooks execution works, we know that only context is stored per execution, which by the application of the library is shared across the child methods. This means that if you call `get` in a child method, it will return the same data as the parent method. But, if you call `create` again, it will essentially replace data for the same execution method, as well as the child methods.
+1. As a side-effect of how the Async Hooks execution works, we know that only context is stored per execution, which by the application of the library is shared across the child methods. This means that if you call `get` in a child method, it will return the same data as the parent method. But, if you call `create` again, it will essentially replace data for the same execution method, as well as the child methods.
 
 In a further version, we will add a method to disable this behavior, if warranted.
+
+2. Changing the context as an object anywhere, will essentially change the source object for the context. This means the following code can cause side effects elsewhere:
+
+```javascript
+// File 1 (executed first)
+
+const context = CoreContext.get();
+
+context.data.something = 1;
+
+// File 2 (executed later)
+
+const context = CoreContext.get();
+
+console.log(context.data.something);
+// prints 1
+```
+
+Thus, care should be taken when changing the context object.
+
+#### Tests
+
+- Used Mocha with Chai as Unit Tests
+- k6 was used to load test, to check if library was leaking data beyond a request (1500vus)
+
+[Test Coverage](/coverage/)
 
 ## Authors
 
