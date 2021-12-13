@@ -5,9 +5,7 @@
 [![GitHub license](https://img.shields.io/github/license/theinternetfolks/context.svg)](https://github.com/theinternetfolks/context/blob/master/LICENSE)
 [![GitHub latest commit](https://badgen.net/github/last-commit/theinternetfolks/context)](https://GitHub.com/theinternetfolks/context/commit/)
 [![Maintainer](https://img.shields.io/badge/maintainer-monkfromearth-green)](https://github.com/monkfromearth)
-[![made-with-javascript](https://img.shields.io/badge/Made%20with-JavaScript-1f425f.svg)](https://www.javascript.com)
 [![Npm package version](https://badgen.net/npm/v/@theinternetfolks/context)](https://npmjs.com/package/@theinternetfolks/context)
-[![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/theinternetfolks/context)
 
 Library to help you create a context that can be used to reference data, without prop drilling, in Node-based environments.
 
@@ -96,7 +94,7 @@ Install with yarn
 
 ## Usage/Examples
 
-#### Example 2
+#### Example 1
 
 Simple usage in a simple function call based Node script.
 
