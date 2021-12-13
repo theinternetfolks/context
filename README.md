@@ -85,7 +85,7 @@ Install with yarn
 
 - Lightweight-implementation using the native `Map` structure
 - Typescript typings with your interfaces
-- Works for all kind of async functions - `tim
+- Works for all kind of async functions - `Promises`, `Timeouts`, `TCPWrap`, `UDP` etc.
 
 ## Usage/Examples
 
@@ -105,21 +105,25 @@ CoreContext.Loader();
 
 
 // some example function calls
-export const doEpicShit = async (): Promise<void> => {
+const ChildFunction = async (): Promise<void> => {
   const context = CoreContext.get();
+
   // Logs to the Id generated during creationg
   console.log(context?.id);
+
+  // Use the data stored in the context
+  console.log(context?.data.host);
 };
 
-const doSomething = async () => {
+const ParentFunction = async () => {
   const context = CoreContext.get();
 
   // works for async/await
-  await doEpicShit();
+  await ChildFunction();
 
   // works timeouts as well
   setTimeout(() => {
-    doEpicShit();
+    ChildFunction();
   }, 1500);
 };
 
@@ -135,16 +139,15 @@ const app = express();
 
 app.use(express.json());
 
-app.use("/", async (req, res, next) => {
-  const data = { host: req.get("host") };
-  CoreContext.create<IPayload>(data);
+app.use("/", async (request, response, next) => {
+  CoreContext.create<IPayload>({ host: request.get("host") });
   next();
 });
 
-app.get("/", async (req, res) => {
+app.get("/", (request, response) => {
   const context = CoreContext.get<IPayload>();
-  doSomething();
-  return res.json(context?.id);
+  ParentFunction();
+  return response.json(context?.id);
 });
 
 
@@ -171,9 +174,11 @@ app.listen(3000, () => {
 - `get: <T>() => ICoreContextPayload<T>;`
   Method used to retrieve the data stored in the context.
 
-**Known Behavior:**
+**Known Behavior**
 
-As a side-effect of how the Async Hooks execution works,
+As a side-effect of how the Async Hooks execution works, we know that only context is stored per execution, which by the application of the library is shared across the child methods. This means that if you call `get` in a child method, it will return the same data as the parent method. But, if you call `create` again, it will essentially replace data for the same execution method, as well as the child methods.
+
+In a further version, we will add a method to disable this behavior, if warranted.
 
 ## Authors
 

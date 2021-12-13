@@ -6,5 +6,5 @@
     "rootDir": "src/",
     "outDir": "./"
   },
-  "exclude": []
+  "exclude": ["./tests"]
 }
