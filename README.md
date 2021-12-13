@@ -3,9 +3,7 @@
 # @theinternetfolks/context
 
 [![GitHub license](https://img.shields.io/github/license/theinternetfolks/context.svg)](https://github.com/theinternetfolks/context/blob/master/LICENSE)
-[![GitHub latest commit](https://badgen.net/github/last-commit/theinternetfolks/context)](https://GitHub.com/theinternetfolks/context/commit/)
 [![Maintainer](https://img.shields.io/badge/maintainer-monkfromearth-green)](https://github.com/monkfromearth)
-[![Npm package version](https://badgen.net/npm/v/@theinternetfolks/context)](https://npmjs.com/package/@theinternetfolks/context)
 
 Library to help you create a context that can be used to reference data, without prop drilling, in Node-based environments.
 
