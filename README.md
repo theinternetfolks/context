@@ -1,3 +1,5 @@
+[![The Internet Folks Logo](https://theinternetfolks.com/assets/images/logo.png)](https://theinternetfolks.com)
+
 # @theinternetfolks/context
 
 Library to help you create a context that can be used to reference data, without prop drilling, in Node-based environments.
