@@ -1,0 +1,38 @@
+{
+  "name": "@theinternetfolks/context",
+  "version": "1.0.0",
+  "description": "Library to help you create a context that can be used to reference data, without prop drilling, in Node-based environments.",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:map": "tsc -d --declarationDir . --declarationMap --emitDeclarationOnly"
+  },
+  "author": "Sameer Khan <sameer.khan@theinternetfolks.com>",
+  "organization": "The Internet Folks",
+  "repository": "https://github.com/theinternetfolks/context",
+  "files": [
+    "src/",
+    "tests/",
+    ".gitignore",
+    "index.js",
+    "index.js.map",
+    "index.d.ts",
+    "index.d.ts.map",
+    "LICENSE",
+    "package.json",
+    "README.md",
+    "tsconfig.json",
+    "yarn.lock"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chai": "^4.3.0",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "^16.11.12",
+    "chai": "^4.3.4",
+    "mocha": "^9.1.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
