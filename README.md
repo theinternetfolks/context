@@ -318,7 +318,7 @@ Thus, care should be taken when changing the context object.
 - Used Mocha with Chai as Unit Tests
 - k6 was used to load test, to check if library was leaking data beyond a request (1500vus)
 
-[Test Coverage](/coverage/)
+[Test Coverage](https://theinternetfolks.github.io/context/coverage/)
 
 ## Authors
 
