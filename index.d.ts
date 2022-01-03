@@ -5,10 +5,13 @@
  * @property {number} asyncId - the id of the current execution context
  * @property {T} data - the data shared in the context
  */
-export interface ICoreContextPayload<T> {
+interface ICoreContextPayload {
     id: string;
     asyncId: number;
-    data: T;
+    data: Record<string, any>;
+}
+interface ISetOptions {
+    overwrite?: boolean;
 }
 /**
  * the container interface that keeps the data stored in the Map
@@ -34,12 +37,32 @@ export declare class CoreContext {
      * @param id - the user-provided id for the context, if not provided, a random one will be generated. This doesn't have to be necessarily unique.
      * @returns {ICoreContextPayload<T>} the payload of the context.
      */
-    static create: <T>(data: T, id?: string) => ICoreContextPayload<T>;
+    static create: (id?: string) => ICoreContextPayload;
+    /**
+     * Method used to store data in the context.
+     * @param {object} data - the data to be stored.
+     * @param {object} [options] - options for data to be stored.
+     * @param {boolean} [options.overwrite] - if false, does not overwrite the data if key already exists.
+     * @returns {boolean} - true if the data was set succesfully, false otherwise.
+     */
+    static set: (data: Record<string, any>, options?: ISetOptions) => boolean;
     /**
      * Method used to retrieve the data shared in the context.
-     * @param asyncId - the execution id for any context.
-     * @returns {ICoreContextPayload<T> | undefined} the data stored in the context.
+     * @param {string} key - the key of the data to be retrieved.
+     * @param {number} [asyncId] - the execution id for any context.
+     * @returns {T | undefined} the data stored in the context.
      */
-    static get: <T>(asyncId?: number) => ICoreContextPayload<T>;
+    static get: <T>(key?: string | null, asyncId?: number) => T;
+    /**
+     * Method used to retrieve the id of the context.
+     * @returns {string | null} the id of the context.
+     */
+    static getId: () => string | null;
+    /**
+     * Method used to delete the data stored in the context.
+     * @param {string} [key] - the key of the data to be removed.
+     */
+    static remove: (key?: string) => void;
 }
+export {};
 //# sourceMappingURL=index.d.ts.map

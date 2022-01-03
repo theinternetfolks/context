@@ -44,7 +44,7 @@ What you could simply do is:
 ```javascript
 
 callFunction1(originalData){
-    CoreContext.create(originalData)
+    CoreContext.set(originalData)
     callFunction2(someData)
 }
 
@@ -61,7 +61,7 @@ callFunction3(){
 
 callFunction4(){
     // Use the original data finally for any kind of work
-    const { data } = CoreContext.get()
+    const data = CoreContext.get()
     useTheOriginalDataFinally(data)
 }
 ```
@@ -100,13 +100,12 @@ Simple usage in a simple function call based Node script.
 const { CoreContext } = require("@theinternetfolks/context");
 
 const SomeFunction = () => {
-  const context = CoreContext.get();
-  console.log(`Context Id: ${context.id}`);
-  console.log(`Name: ${context.data.name}`);
+  const data = CoreContext.get();
+  console.log(`Name: ${data.name}`);
 };
 
 (() => {
-  CoreContext.create({ name: "The Internet Folks" }, "some-id");
+  CoreContext.set({ name: "The Internet Folks" });
   SomeFunction();
 })();
 ```
@@ -114,7 +113,6 @@ const SomeFunction = () => {
 **Output**:
 
 ```bash
-Context Id: some-id
 Name: The Internet Folks
 ```
 
@@ -126,19 +124,20 @@ Simple Parent-Child function usage in a nested function call based Node script.
 const { CoreContext } = require("@theinternetfolks/context");
 
 const ChildFunction = () => {
-  const context = CoreContext.get();
-  console.log(`Context Id: ${context.id} in Child`);
-  console.log(`Name from Context: ${context.data.name} in Child`);
+  const data = CoreContext.get();
+  console.log(`Name from Context: ${data.name} in Child`);
 };
 
 const ParentFunction = () => {
-  const context = CoreContext.get();
-  console.log(`Context Id: ${context.id} in Parent`);
+  const data = CoreContext.get();
+  console.log(`Name from Context: ${data.name} in Parent`);
   ChildFunction();
 };
 
 (() => {
-  CoreContext.create({ name: "The Internet Folks" }, "some-id");
+  // You could use create and set separately
+  CoreContext.create();
+  CoreContext.set({ name: "The Internet Folks" });
   ParentFunction();
 })();
 ```
@@ -146,8 +145,7 @@ const ParentFunction = () => {
 **Output**:
 
 ```bash
-Context Id: some-id in Parent
-Context Id: some-id in Child
+Name from Context: The Internet Folks in Parent
 Name from Context: The Internet Folks in Child
 ```
 
@@ -164,17 +162,13 @@ const { CoreContext } = require("@theinternetfolks/context");
 
 // some example function calls
 const ChildFunction = async () => {
-  const context = CoreContext.get();
-
-  // Logs to the Id generated during creationg
-  console.log(context?.id);
+  const data = CoreContext.get();
 
   // Use the data stored in the context
-  console.log(context?.data.host);
+  console.log(data.host);
 };
 
 const ParentFunction = async () => {
-  const context = CoreContext.get();
   ChildFunction();
 };
 
@@ -184,14 +178,14 @@ const app = express();
 app.use(express.json());
 
 app.use("/", async (request, response, next) => {
-  CoreContext.create({ host: request.get("host") });
+  CoreContext.set({ host: request.get("host") });
   next();
 });
 
 app.get("/", (request, response) => {
-  const context = CoreContext.get();
+  const data = CoreContext.get();
   ParentFunction();
-  return response.json(context?.id);
+  return response.json(data?.host);
 });
 
 // starting the server
@@ -214,13 +208,10 @@ import { CoreContext } from "@theinternetfolks/context";
 
 // some example function calls
 const ChildFunction = async (): Promise<void> => {
-  const context = CoreContext.get();
-
-  // Logs to the Id generated during creationg
-  console.log(context?.id);
+  const data = CoreContext.get();
 
   // Use the data stored in the context
-  console.log(context?.data.host);
+  console.log(data?.host);
 };
 
 const ParentFunction = async () => {
@@ -248,14 +239,14 @@ const app = express();
 app.use(express.json());
 
 app.use("/", async (request, response, next) => {
-  CoreContext.create<IPayload>({ host: request.get("host") });
+  CoreContext.set({ host: request.get("host") });
   next();
 });
 
 app.get("/", (request, response) => {
   const context = CoreContext.get<IPayload>();
   ParentFunction();
-  return response.json(context?.id);
+  return response.json(context?.host);
 });
 
 
@@ -270,11 +261,20 @@ app.listen(3000, () => {
 
 #### Table of Content
 
-- `create: <T>(data: T, id?: string) => ICoreContextPayload<T>;`
+- `create:(id?: string) => ICoreContextPayload<T>;`
   Method used to create a context, and pass data to be stored.
 
-- `get: <T>() => ICoreContextPayload<T>;`
+- `get: <T>() => T;`
   Method used to retrieve the data stored in the context.
+
+- `set: (data: Record<string, any>, options: ISetOptions) => boolean;`
+  Method used to store data in the context.
+
+- `remove: (key?: string) => void;`
+  Method used to delete the data stored in the context.
+
+- `getId: () => string | null;`
+  Method used to retrieve the id of the context.
 
 **Internal variables and methods**
 
@@ -299,17 +299,17 @@ In a further version, we will add a method to disable this behavior, if warrante
 
 const context = CoreContext.get();
 
-context.data.something = 1;
+context.something = 1;
 
 // File 2 (executed later)
 
 const context = CoreContext.get();
 
-console.log(context.data.something);
+console.log(context.something);
 // prints 1
 ```
 
-Thus, care should be taken when changing the context object.
+Thus, care should be taken when changing the context object. **Only** use set, and get method for changing the context object.
 
 #### Tests
 

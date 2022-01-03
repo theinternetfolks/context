@@ -63,21 +63,92 @@ var CoreContext = /** @class */ (function () {
      * @param id - the user-provided id for the context, if not provided, a random one will be generated. This doesn't have to be necessarily unique.
      * @returns {ICoreContextPayload<T>} the payload of the context.
      */
-    CoreContext.create = function (data, id) {
+    CoreContext.create = function (id) {
         if (id === void 0) { id = crypto.randomBytes(16).toString("hex"); }
         var asyncId = asyncHooks.executionAsyncId();
-        var info = { id: id, asyncId: asyncId, data: data };
+        var info = { id: id, asyncId: asyncId, data: {} };
         CoreContext.store.set(asyncId, info);
         return info;
     };
     /**
+     * Method used to store data in the context.
+     * @param key - the key of the data to be stored.
+     * @param data - the data to be stored.
+     */
+    CoreContext.set = function (data, options) {
+        if (options === void 0) { options = { overwrite: true }; }
+        var payload = CoreContext.get();
+        if (!payload) {
+            CoreContext.create();
+            payload = CoreContext.get();
+        }
+        var keys = Object.keys(data);
+        if (keys.length) {
+            for (var _i = 0, keys_1 = keys; _i < keys_1.length; _i++) {
+                var key = keys_1[_i];
+                if ((typeof payload[key] !== "undefined" &&
+                    ((options === null || options === void 0 ? void 0 : options.overwrite) || typeof options.overwrite === "undefined")) ||
+                    !payload[key]) {
+                    payload[key] = data[key];
+                }
+            }
+            return true;
+        }
+        return false;
+    };
+    /**
      * Method used to retrieve the data shared in the context.
-     * @param asyncId - the execution id for any context.
+     * @param {string} key - the key of the data to be retrieved.
+     * @param {number} asyncId - the execution id for any context.
      * @returns {ICoreContextPayload<T> | undefined} the data stored in the context.
      */
-    CoreContext.get = function (asyncId) {
+    CoreContext.get = function (key, asyncId) {
+        if (key === void 0) { key = null; }
         if (asyncId === void 0) { asyncId = asyncHooks.executionAsyncId(); }
-        return CoreContext.store.get(asyncId);
+        var payload = CoreContext.store.get(asyncId);
+        if (!payload) {
+            return;
+        }
+        else {
+            if (key) {
+                return payload.data[key];
+            }
+            else {
+                return payload.data;
+            }
+        }
+    };
+    /**
+     * Method used to retrieve the id of the context.
+     * @returns {string | null} the id of the context.
+     */
+    CoreContext.getId = function () {
+        var payload = CoreContext.store.get(asyncHooks.executionAsyncId());
+        if (!payload) {
+            return null;
+        }
+        else {
+            return payload.id;
+        }
+    };
+    /**
+     * Method used to delete the data stored in the context.
+     * @param key - the key of the data to be removed.
+     */
+    CoreContext.remove = function (key) {
+        var payload = CoreContext.get();
+        if (payload) {
+            if (key) {
+                delete payload[key];
+            }
+            else {
+                var keys = Object.keys(payload);
+                for (var _i = 0, keys_2 = keys; _i < keys_2.length; _i++) {
+                    var key_1 = keys_2[_i];
+                    delete payload[key_1];
+                }
+            }
+        }
     };
     return CoreContext;
 }());

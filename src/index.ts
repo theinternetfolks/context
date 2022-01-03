@@ -9,10 +9,14 @@ import * as crypto from "crypto";
  * @property {number} asyncId - the id of the current execution context
  * @property {T} data - the data shared in the context
  */
-export interface ICoreContextPayload<T> {
+interface ICoreContextPayload {
   id: string;
   asyncId: number;
-  data: T;
+  data: Record<string, any>;
+}
+
+interface ISetOptions {
+  overwrite?: boolean;
 }
 
 /**
@@ -76,25 +80,98 @@ export class CoreContext {
    * @param id - the user-provided id for the context, if not provided, a random one will be generated. This doesn't have to be necessarily unique.
    * @returns {ICoreContextPayload<T>} the payload of the context.
    */
-  static create = <T>(
-    data: T,
+  static create = (
     id: string = crypto.randomBytes(16).toString("hex")
-  ): ICoreContextPayload<T> => {
+  ): ICoreContextPayload => {
     const asyncId = asyncHooks.executionAsyncId();
-    const info = { id, asyncId, data };
+    const info = { id, asyncId, data: {} };
     CoreContext.store.set(asyncId, info);
     return info;
   };
 
   /**
+   * Method used to store data in the context.
+   * @param {object} data - the data to be stored.
+   * @param {object} [options] - options for data to be stored.
+   * @param {boolean} [options.overwrite] - if false, does not overwrite the data if key already exists.
+   * @returns {boolean} - true if the data was set succesfully, false otherwise.
+   */
+  static set = (
+    data: Record<string, any>,
+    options: ISetOptions = { overwrite: true }
+  ): boolean => {
+    let payload = CoreContext.get<Record<string, unknown>>();
+    if (!payload) {
+      CoreContext.create();
+      payload = CoreContext.get<Record<string, unknown>>();
+    }
+    const keys = Object.keys(data);
+    if (keys.length) {
+      for (const key of keys) {
+        if (
+          (typeof payload[key] !== "undefined" &&
+            (options?.overwrite || typeof options.overwrite === "undefined")) ||
+          !payload[key]
+        ) {
+          payload[key] = data[key];
+        }
+      }
+      return true;
+    }
+    return false;
+  };
+
+  /**
    * Method used to retrieve the data shared in the context.
-   * @param asyncId - the execution id for any context.
-   * @returns {ICoreContextPayload<T> | undefined} the data stored in the context.
+   * @param {string} key - the key of the data to be retrieved.
+   * @param {number} [asyncId] - the execution id for any context.
+   * @returns {T | undefined} the data stored in the context.
    */
   static get = <T>(
+    key: string | null = null,
     asyncId: number = asyncHooks.executionAsyncId()
-  ): ICoreContextPayload<T> | undefined => {
-    return CoreContext.store.get(asyncId);
+  ): T | undefined => {
+    const payload = CoreContext.store.get(asyncId);
+    if (!payload) {
+      return;
+    } else {
+      if (key) {
+        return payload.data[key];
+      } else {
+        return payload.data;
+      }
+    }
+  };
+
+  /**
+   * Method used to retrieve the id of the context.
+   * @returns {string | null} the id of the context.
+   */
+  static getId = (): string | null => {
+    const payload = CoreContext.store.get(asyncHooks.executionAsyncId());
+    if (!payload) {
+      return null;
+    } else {
+      return payload.id;
+    }
+  };
+
+  /**
+   * Method used to delete the data stored in the context.
+   * @param {string} [key] - the key of the data to be removed.
+   */
+  static remove = (key?: string): void => {
+    const payload = CoreContext.get<Record<string, unknown>>();
+    if (payload) {
+      if (key) {
+        delete payload[key];
+      } else {
+        const keys = Object.keys(payload);
+        for (const key of keys) {
+          delete payload[key];
+        }
+      }
+    }
   };
 }
 
