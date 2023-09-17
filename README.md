@@ -4,6 +4,8 @@
 
 [![GitHub license](https://img.shields.io/github/license/theinternetfolks/context.svg)](https://github.com/theinternetfolks/context/blob/master/LICENSE)
 [![Maintainer](https://img.shields.io/badge/maintainer-monkfromearth-green)](https://github.com/monkfromearth)
+![Works on Bun](https://img.shields.io/badge/Bun-%23000000.svg?style=for-the-badge&logo=bun&logoColor=white)
+![Works on TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
 
 Library to help you create a context that can be used to reference data, without prop drilling, in Node-based environments.
 
@@ -44,7 +46,7 @@ What you could simply do is:
 ```javascript
 
 callFunction1(originalData){
-    CoreContext.set(originalData)
+    Context.set(originalData)
     callFunction2(someData)
 }
 
@@ -61,14 +63,12 @@ callFunction3(){
 
 callFunction4(){
     // Use the original data finally for any kind of work
-    const data = CoreContext.get()
+    const data = Context.get()
     useTheOriginalDataFinally(data)
 }
 ```
 
-The library uses [Async Hooks](https://nodejs.org/api/async_hooks.html#async_hooks_async_hooks) internally. Async Hooks are a core module in Node.js that provides an API to track the lifetime of asynchronous resources in a Node application. An asynchronous resource can be thought of as an object that has an associated callback.
-
-Examples include, but are not limited to: `Promises`, `Timeouts`, `TCPWrap`, `UDP` etc. The whole list of asynchronous resources that we can track using this API can be found [here](https://nodejs.org/api/async_hooks.html#async_hooks_type).
+The library uses [Async Local Storage](https://nodejs.org/api/async_context.html#class-asynclocalstorage) internally. Async Local Storage are a core module in Node.js that provides an API to track the lifetime of asynchronous resources in a Node application. An asynchronous resource can be thought of as an object that has an associated callback.
 
 ## Installation
 
@@ -84,6 +84,12 @@ Install with yarn
   yarn add @theinternetfolks/context
 ```
 
+Install with bun
+
+```bash
+  bun add @theinternetfolks/context
+```
+
 ## Features
 
 - Lightweight-implementation using the native `Map` structure
@@ -97,15 +103,15 @@ Install with yarn
 Simple usage in a simple function call based Node script.
 
 ```javascript
-const { CoreContext } = require("@theinternetfolks/context");
+const Context = require("@theinternetfolks/context");
 
 const SomeFunction = () => {
-  const data = CoreContext.get();
+  const data = Context.get();
   console.log(`Name: ${data.name}`);
 };
 
 (() => {
-  CoreContext.set({ name: "The Internet Folks" });
+  Context.set({ name: "The Internet Folks" });
   SomeFunction();
 })();
 ```
@@ -121,23 +127,23 @@ Name: The Internet Folks
 Simple Parent-Child function usage in a nested function call based Node script.
 
 ```javascript
-const { CoreContext } = require("@theinternetfolks/context");
+const Context = require("@theinternetfolks/context");
 
 const ChildFunction = () => {
-  const data = CoreContext.get();
+  const data = Context.get();
   console.log(`Name from Context: ${data.name} in Child`);
 };
 
 const ParentFunction = () => {
-  const data = CoreContext.get();
+  const data = Context.get();
   console.log(`Name from Context: ${data.name} in Parent`);
   ChildFunction();
 };
 
 (() => {
   // You could use create and set separately
-  CoreContext.create();
-  CoreContext.set({ name: "The Internet Folks" });
+  Context.create();
+  Context.set({ name: "The Internet Folks" });
   ParentFunction();
 })();
 ```
@@ -158,19 +164,7 @@ The data in the created context will **only** be accessible to that particular r
 ```javascript
 const express = require("express");
 
-const { CoreContext } = require("@theinternetfolks/context");
-
-// some example function calls
-const ChildFunction = async () => {
-  const data = CoreContext.get();
-
-  // Use the data stored in the context
-  console.log(data.host);
-};
-
-const ParentFunction = async () => {
-  ChildFunction();
-};
+const Context = require("@theinternetfolks/context");
 
 // starting the express server
 const app = express();
@@ -178,13 +172,12 @@ const app = express();
 app.use(express.json());
 
 app.use("/", async (request, response, next) => {
-  CoreContext.set({ host: request.get("host") });
+  Context.set({ host: request.get("host") });
   next();
 });
 
 app.get("/", (request, response) => {
-  const data = CoreContext.get();
-  ParentFunction();
+  const data = Context.get();
   return response.json(data?.host);
 });
 
@@ -203,28 +196,7 @@ The data in the created context will **only** be accessible to that particular r
 ```javascript
 import express from "express";
 
-import { CoreContext } from "@theinternetfolks/context";
-
-
-// some example function calls
-const ChildFunction = async (): Promise<void> => {
-  const data = CoreContext.get();
-
-  // Use the data stored in the context
-  console.log(data?.host);
-};
-
-const ParentFunction = async () => {
-  const context = CoreContext.get();
-
-  // works for async/await
-  await ChildFunction();
-
-  // works timeouts as well
-  setTimeout(() => {
-    ChildFunction();
-  }, 1500);
-};
+import Context from "@theinternetfolks/context";
 
 
 // declaring custom interfaces that can be reused
@@ -239,20 +211,25 @@ const app = express();
 app.use(express.json());
 
 app.use("/", async (request, response, next) => {
-  CoreContext.set({ host: request.get("host") });
+  Context.set({ host: request.get("host") });
   next();
 });
 
 app.get("/", (request, response) => {
-  const context = CoreContext.get<IPayload>();
-  ParentFunction();
+  const context = Context.get<IPayload>();
+
+  // works timeouts as well
+  setTimeout(() => {
+    console.log(context?.host)
+  }, 2500);
+
   return response.json(context?.host);
 });
 
 
 // starting the server
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
+app.listen(6174, () => {
+  console.log("Server running on port 6174");
 });
 
 ```
@@ -260,9 +237,6 @@ app.listen(3000, () => {
 ## Documentation
 
 #### Table of Content
-
-- `create:(id?: string) => ICoreContextPayload<T>;`
-  Method used to create a context, and pass data to be stored.
 
 - `get: <T>() => T;`
   Method used to retrieve the data stored in the context.
@@ -273,14 +247,11 @@ app.listen(3000, () => {
 - `remove: (key?: string) => void;`
   Method used to delete the data stored in the context.
 
-- `getId: () => string | null;`
-  Method used to retrieve the id of the context.
-
 **Internal variables and methods**
 
 These are handled internally by the library, and doesn't require your intervention.
 
-- `store: Map<any, any>;`
+- `store: AsyncLocalStorage<IContextPayload>;`
   The Map that stores all the data of the context.
 
 - `Loader(): void;`
@@ -288,7 +259,7 @@ These are handled internally by the library, and doesn't require your interventi
 
 **Known Behavior**
 
-1. As a side-effect of how the Async Hooks execution works, we know that only context is stored per execution, which by the application of the library is shared across the child methods. This means that if you call `get` in a child method, it will return the same data as the parent method. But, if you call `create` again, it will essentially replace data for the same execution method, as well as the child methods.
+1. As a side-effect of how the Async Hooks execution works, we know that only context is stored per execution, which by the application of the library is shared across the child methods. This means that if you call `get` in a child method, it will return the same data as the parent method. But, if you call `Loader()` again, it will essentially replace data for the same execution method, as well as the child methods.
 
 In a further version, we will add a method to disable this behavior, if warranted.
 
@@ -297,13 +268,13 @@ In a further version, we will add a method to disable this behavior, if warrante
 ```javascript
 // File 1 (executed first)
 
-const context = CoreContext.get();
+const context = Context.get();
 
 context.something = 1;
 
 // File 2 (executed later)
 
-const context = CoreContext.get();
+const context = Context.get();
 
 console.log(context.something);
 // prints 1
@@ -314,12 +285,10 @@ Thus, care should be taken when changing the context object. **Only** use set, a
 #### Tests
 
 - Used Mocha with Chai as Unit Tests
-- k6 was used to load test, to check if library was leaking data beyond a request (1500vus)
+- k6 was used to load test, to check if library was leaking data beyond a request (10000vus)
 
 [Test Coverage](https://theinternetfolks.github.io/context/coverage/)
 
 ## Authors
 
 - Sameer Khan ([@monkfromearth](https://www.github.com/monkfromearth))
-
-The authors are indebted to [Allan Mogusu](https://twitter.com/AllanMogusu), the original author of the [article](https://stackabuse.com/using-async-hooks-for-request-context-handling-in-node-js/) that inspired the library.
