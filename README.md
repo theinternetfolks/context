@@ -92,7 +92,7 @@ Install with bun
 
 ## Features
 
-- Lightweight-implementation using the native `Map` structure
+- Lightweight-implementation using the native `AsyncLocalStoage` structure
 - Typescript typings with your interfaces
 - Works for all kind of async functions - `Promises`, `Timeouts`, `TCPWrap`, `UDP` etc.
 
@@ -103,7 +103,7 @@ Install with bun
 Simple usage in a simple function call based Node script.
 
 ```javascript
-const Context = require("@theinternetfolks/context");
+const { Context } = require("@theinternetfolks/context");
 
 const SomeFunction = () => {
   const data = Context.get();
@@ -127,7 +127,7 @@ Name: The Internet Folks
 Simple Parent-Child function usage in a nested function call based Node script.
 
 ```javascript
-const Context = require("@theinternetfolks/context");
+const { Context } = require("@theinternetfolks/context");
 
 const ChildFunction = () => {
   const data = Context.get();
@@ -164,7 +164,7 @@ The data in the created context will **only** be accessible to that particular r
 ```javascript
 const express = require("express");
 
-const Context = require("@theinternetfolks/context");
+const { Context } = require("@theinternetfolks/context");
 
 // starting the express server
 const app = express();
@@ -238,13 +238,13 @@ app.listen(6174, () => {
 
 #### Table of Content
 
-- `get: <T>() => T;`
+- `static get: <T>(key?: string | null) => T;`
   Method used to retrieve the data stored in the context.
 
-- `set: (data: Record<string, any>, options: ISetOptions) => boolean;`
+- `static set: (data: Record<string, any>) => boolean;`
   Method used to store data in the context.
 
-- `remove: (key?: string) => void;`
+- `static remove: (key?: string) => void;`
   Method used to delete the data stored in the context.
 
 **Internal variables and methods**

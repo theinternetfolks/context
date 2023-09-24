@@ -1,4 +1,4 @@
-import Context from "../src";
+import { Context } from "../src";
 import { expect } from "chai";
 
 /**

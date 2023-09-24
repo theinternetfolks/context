@@ -1,8 +1,8 @@
 import express from "express";
 
-import { CoreContext } from "../../src/static";
+import { Context } from "../../src";
 
-CoreContext.Loader();
+Context.Loader();
 
 // declaring custom interfaces that can be reused
 interface IPayload {
@@ -15,12 +15,12 @@ const app = express();
 app.use(express.json());
 
 app.use(async (request, response, next) => {
-  CoreContext.set({ value: request.query.value });
+  Context.set({ value: request.query.value });
   return next();
 });
 
 app.get("/", (request, response) => {
-  const context = CoreContext.get<IPayload>();
+  const context = Context.get<IPayload>();
   return response.send(context?.value);
 });
 

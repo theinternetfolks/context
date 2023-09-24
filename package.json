@@ -1,13 +1,14 @@
 {
   "name": "@theinternetfolks/context",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Library to help you create a context that can be used to reference data, without prop drilling, in Node-based environments.",
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "build": "tsc",
     "build:map": "tsc -d --declarationDir . --declarationMap --emitDeclarationOnly",
     "test": "mocha --ignore 'node_modules/**/*' -r ts-node/register --recursive --exit tests/*.ts",
-    "test-coverage": "c8 yarn test && c8 report -r html"
+    "test-coverage": "c8 bun test && c8 report -r html"
   },
   "author": "Sameer Khan <sameer.khan@theinternetfolks.com>",
   "organization": "The Internet Folks",

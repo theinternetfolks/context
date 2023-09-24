@@ -13,7 +13,7 @@ type IContextPayload = Record<string, any>;
  * to be used by the async hooks
  */
 /* c8 ignore start */
-class Context {
+export class Context {
   static store: AsyncLocalStorage<IContextPayload>;
   /* c8 ignore end */
 
@@ -43,7 +43,7 @@ class Context {
 
     if (keys.length) {
       for (const key of keys) {
-        if (typeof payload[key] !== "undefined") {
+        if (typeof data[key] !== "undefined") {
           payload[key] = data[key];
         }
       }
@@ -61,15 +61,13 @@ class Context {
    */
   static get = <T>(key: string | null = null): T | undefined => {
     const payload = this.store.getStore();
-    if (!payload) {
-      return;
-    } else {
+    if (payload) {
       if (key) {
         return payload[key];
-      } else {
-        return payload as T;
       }
+      return payload as T;
     }
+    return undefined;
   };
 
   /**
@@ -83,8 +81,8 @@ class Context {
         delete payload[key];
       } else {
         const keys = Object.keys(payload);
-        for (const key of keys) {
-          delete payload[key];
+        for (const item of keys) {
+          delete payload[item];
         }
       }
 
@@ -92,5 +90,3 @@ class Context {
     }
   };
 }
-
-export default Context;

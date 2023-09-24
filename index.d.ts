@@ -11,7 +11,7 @@ type IContextPayload = Record<string, any>;
  * the container interface that keeps the data stored in the Map
  * to be used by the async hooks
  */
-declare class Context {
+export declare class Context {
     static store: AsyncLocalStorage<IContextPayload>;
     static Loader(): void;
     /**
@@ -34,5 +34,5 @@ declare class Context {
      */
     static remove: (key?: string) => void;
 }
-export default Context;
+export {};
 //# sourceMappingURL=index.d.ts.map

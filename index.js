@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Context = void 0;
 var async_hooks_1 = require("async_hooks");
 /**
  * the container interface that keeps the data stored in the Map
@@ -35,7 +36,7 @@ var Context = /** @class */ (function () {
         if (keys.length) {
             for (var _i = 0, keys_1 = keys; _i < keys_1.length; _i++) {
                 var key = keys_1[_i];
-                if (typeof payload[key] !== "undefined") {
+                if (typeof data[key] !== "undefined") {
                     payload[key] = data[key];
                 }
             }
@@ -52,17 +53,13 @@ var Context = /** @class */ (function () {
     Context.get = function (key) {
         if (key === void 0) { key = null; }
         var payload = _a.store.getStore();
-        if (!payload) {
-            return;
-        }
-        else {
+        if (payload) {
             if (key) {
                 return payload[key];
             }
-            else {
-                return payload;
-            }
+            return payload;
         }
+        return undefined;
     };
     /**
      * Method used to delete the data stored in the context.
@@ -77,8 +74,8 @@ var Context = /** @class */ (function () {
             else {
                 var keys = Object.keys(payload);
                 for (var _i = 0, keys_2 = keys; _i < keys_2.length; _i++) {
-                    var key_1 = keys_2[_i];
-                    delete payload[key_1];
+                    var item = keys_2[_i];
+                    delete payload[item];
                 }
             }
             _a.store.enterWith(payload);
@@ -86,5 +83,5 @@ var Context = /** @class */ (function () {
     };
     return Context;
 }());
-exports.default = Context;
+exports.Context = Context;
 //# sourceMappingURL=index.js.map
