@@ -2,8 +2,6 @@ import express from "express";
 
 import { Context } from "../../src";
 
-Context.Loader();
-
 // declaring custom interfaces that can be reused
 interface IPayload {
   value: string;
@@ -15,6 +13,7 @@ const app = express();
 app.use(express.json());
 
 app.use(async (request, response, next) => {
+  Context.init();
   Context.set({ value: request.query.value });
   return next();
 });

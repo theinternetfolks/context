@@ -1,16 +1,15 @@
+import { describe, it, beforeEach } from 'bun:test';
+import { expect } from 'chai';
 import { Context } from "../src";
-import { expect } from "chai";
 
-/**
- * Positive Cases
- * - should store data for the given key
- * - should replace data for the same key
- * - should replace data for the same key in child methods
- * - should create context if it is not present, and set the value
- *
- * Negative Cases
- * - should not replace data if overwriting is disabled
- */
+
+describe("init", () => {
+  it("should initialize a new context", () => {
+    Context.init();
+    expect(Context.get()).to.deep.equal({});
+  });
+});
+
 describe("set", () => {
   it("should store data for the given key", async () => {
     const test = {
@@ -18,14 +17,10 @@ describe("set", () => {
       title: "Test 1",
     };
 
-    Context.Loader();
+    Context.init();
     Context.set(test);
 
-    /**
-     * here the asyncId are same, as the execution context is same,
-     * which is this method
-     */
-    const contextResult = Context.store.getStore();
+    const contextResult = Context.get();
 
     expect(contextResult).to.not.be.undefined;
     expect(contextResult).to.deep.equal(test);
@@ -42,11 +37,11 @@ describe("set", () => {
       title: "Test 4",
     };
 
-    Context.Loader();
+    Context.init();
     Context.set(test1);
     Context.set(test2);
 
-    const contextResult = Context.store.getStore();
+    const contextResult = Context.get();
 
     expect(contextResult).to.not.be.undefined;
     expect(contextResult).to.deep.equal(test2);
@@ -63,21 +58,14 @@ describe("set", () => {
       title: "Test 6",
     };
 
-    Context.Loader();
+    Context.init();
     Context.set(test1);
 
-    /**
-     * here the asyncId are same, as the execution context is same,
-     * which is this method
-     */
-    const contextResult = Context.store.getStore();
+    const contextResult = Context.get();
 
     expect(contextResult).to.not.be.undefined;
     expect(contextResult).to.deep.equal(test1);
 
-    /**
-     * creating an IIFE to test the child method
-     */
     (async () => {
       Context.set(test2);
       const context = Context.get();
@@ -92,14 +80,10 @@ describe("set", () => {
       title: "Test 7",
     };
 
-    Context.Loader();
-    expect(Context.get()).to.be.undefined;
+    Context.init();
+    expect(Context.get()).to.deep.equal({});
     Context.set(test);
 
-    /**
-     * here the asyncId are same, as the execution context is same,
-     * which is this method
-     */
     const contextResult = Context.get();
 
     expect(contextResult).to.not.be.undefined;
@@ -107,33 +91,16 @@ describe("set", () => {
   });
 });
 
-/**
- * Positive Cases
- * - should return the data for context in the same execution method without specifying the asyncId
- * - should return the data for context in the child execution method without specifying the asyncId
- * - should return data for key present in the store
- *
- * Negative Cases
- * - should return undefined for asyncId which is not present in the store
- */
 describe("get", () => {
   it("should return the data for context in the same execution method", () => {
     const tests = [
-      {
-        name: "test-8",
-      },
-      {
-        name: "test-9",
-      },
-      {
-        name: "test-10",
-      },
-      {
-        name: "test-11",
-      },
+      { name: "test-8" },
+      { name: "test-9" },
+      { name: "test-10" },
+      { name: "test-11" },
     ];
 
-    Context.Loader();
+    Context.init();
     for (const test of tests) {
       Context.set(test);
       const data = Context.get();
@@ -144,11 +111,9 @@ describe("get", () => {
   });
 
   it("should return the data for context in the child execution method", () => {
-    const test = {
-      name: "test-12",
-    };
+    const test = { name: "test-12" };
 
-    Context.Loader();
+    Context.init();
 
     (async () => {
       Context.set(test);
@@ -158,30 +123,18 @@ describe("get", () => {
       expect(data).to.deep.equal(test);
     })();
 
-    /**
-     * Level: 1
-     * creating an IIFE to test the child method
-     */
     (() => {
       const context1 = Context.get();
       expect(context1).to.not.be.undefined;
       expect(context1).to.have.property("name");
       expect(context1).to.deep.equal(test);
 
-      /**
-       * Level: 2
-       * creating an IIFE to test the child method
-       */
       (() => {
         const context2 = Context.get();
         expect(context2).to.not.be.undefined;
         expect(context2).to.have.property("name");
         expect(context2).to.deep.equal(test);
 
-        /**
-         * Level: 3
-         * creating an IIFE to test the child method
-         */
         (() => {
           const context3 = Context.get();
           expect(context3).to.not.be.undefined;
@@ -206,18 +159,9 @@ describe("get", () => {
   });
 });
 
-/**
- * Positive Cases
- * - should remove the key if specified
- *
- * Negative Cases
- * - should empty data if no key is specified
- */
 describe("remove", () => {
   it("should empty data if no key is specified", () => {
-    const test = {
-      name: "test-15",
-    };
+    const test = { name: "test-15" };
 
     Context.set(test);
 
@@ -230,5 +174,18 @@ describe("remove", () => {
     context = Context.get();
     expect(context).to.be.empty;
     expect(context).to.not.have.a.property("name");
+  });
+});
+
+describe("getStore", () => {
+  it("should return the current store instance", () => {
+    Context.init();
+    Context.set({ key: "value" });
+    expect(Context.getStore()).to.deep.equal({ key: "value" });
+  });
+
+  it("should return undefined if no store is set", () => {
+    Context.init();
+    expect(Context.getStore()).to.deep.equal({});
   });
 });

@@ -1,14 +1,14 @@
 {
   "name": "@theinternetfolks/context",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Library to help you create a context that can be used to reference data, without prop drilling, in Node-based environments.",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
     "build": "tsc",
     "build:map": "tsc -d --declarationDir . --declarationMap --emitDeclarationOnly",
-    "test": "mocha --ignore 'node_modules/**/*' -r ts-node/register --recursive --exit tests/*.ts",
-    "test-coverage": "c8 bun test && c8 report -r html"
+    "test": "bun test --coverage-reporter=lcov --coverage-reporter=text --coverage",
+    "test-coverage": "lcov-viewer lcov -o ./coverage ./coverage/lcov.info"
   },
   "author": "Sameer Khan <sameer.khan@theinternetfolks.com>",
   "organization": "The Internet Folks",
@@ -27,17 +27,11 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "@types/chai": "^4.3.0",
+    "@types/bun": "^1.2.3",
     "@types/express": "^4.17.17",
-    "@types/k6": "^0.46.3",
-    "@types/mocha": "^9.0.0",
+    "@types/k6": "^0.57.1",
     "@types/node": "^16.11.12",
-    "c8": "^7.10.0",
-    "chai": "^4.3.4",
-    "express": "^4.18.2",
-    "mocha": "^9.1.3",
-    "ts-node": "^10.4.0",
-    "typescript": "^4.5.3"
+    "express": "^4.18.2"
   },
   "publishConfig": {
     "access": "public"
@@ -49,5 +43,6 @@
     "async hooks",
     "request context",
     "request variables"
-  ]
+  ],
+  "packageManager": "pnpm@10.5.0"
 }
