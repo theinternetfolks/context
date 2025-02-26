@@ -41,7 +41,7 @@ describe("Context Isolation", () => {
         result: any;
         isLeaking: boolean;
     }[] = [];
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 1_000_000; i++) {
       results.push(await simulateWorkflow(`seq-${i}`, `data-${i}`));
     }
     expect(results.some(r => r.isLeaking)).toBe(false);
@@ -49,6 +49,8 @@ describe("Context Isolation", () => {
       expect(result.workflowId).toBe(`seq-${i}`);
       expect(result.data).toBe(`data-${i}`);
     });
+  }, {
+    timeout: 60_000,
   });
 
   it(
@@ -84,17 +86,27 @@ describe("Context Isolation", () => {
     Context.init();
     const ctx = Context.get();
     expect(Object.keys(ctx).length).toBe(0);
+
+    Context.init();
+    Context.set({ workflowId: "mod-2", initialData: "test-2" });
+    Context.set({ additionalData: "extra" });
+
+    const endExecutionContext = Context.get();
+    expect(endExecutionContext.workflowId).toBe("mod-2");
+    expect(endExecutionContext.initialData).toBe("test-2");
+    expect(endExecutionContext.additionalData).toBe("extra");
   });
 
   it("should execute a function with isolated context", async () => {
     
+    Context.init();
+
     const result = await Context.run(async () => {
       Context.set({ key: "value" });
       return Context.get();
     });
 
     expect(result).toHaveProperty("key", "value");
-    // @ts-expect-error
-    expect(Context.get()).toEqual({});
+    expect(Context.get()).toBeEmpty();
   });
 });
