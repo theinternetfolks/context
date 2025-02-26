@@ -60,7 +60,7 @@ class Context {
       this.store.enterWith({ ...data });
       return true;
     }
-    const newStore = { ...existingStore };
+    const newStore = existingStore;
     for (const key of keys) {
       if (typeof data[key] !== "undefined") {
         newStore[key] = data[key];
@@ -77,7 +77,7 @@ class Context {
     if (key) {
       return store[key];
     }
-    return { ...store };
+    return store;
   }
   static remove(key) {
     const store = this.store.getStore();

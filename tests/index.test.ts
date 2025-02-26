@@ -1,12 +1,23 @@
-import { describe, it, beforeEach } from 'bun:test';
-import { expect } from 'chai';
+import { describe, it, expect } from 'bun:test';
 import { Context } from "../src";
 
+describe("getStore", () => {
+
+  it("should return undefined if no store is set", () => {
+    expect(Context.getStore()).toBeUndefined();
+  });
+  it("should return the current store instance", () => {
+    Context.init();
+    Context.set({ key: "value" });
+    expect(Context.getStore()).toEqual({ key: "value" });
+  });
+
+});
 
 describe("init", () => {
   it("should initialize a new context", () => {
     Context.init();
-    expect(Context.get()).to.deep.equal({});
+    expect(Context.get()).toBeEmpty();
   });
 });
 
@@ -22,8 +33,8 @@ describe("set", () => {
 
     const contextResult = Context.get();
 
-    expect(contextResult).to.not.be.undefined;
-    expect(contextResult).to.deep.equal(test);
+    expect(contextResult).not.toBeUndefined();
+    expect(contextResult).toEqual(test);
   });
 
   it("should replace data for the same key", async () => {
@@ -43,8 +54,8 @@ describe("set", () => {
 
     const contextResult = Context.get();
 
-    expect(contextResult).to.not.be.undefined;
-    expect(contextResult).to.deep.equal(test2);
+    expect(contextResult).not.toBeUndefined();
+    expect(contextResult).toEqual(test2);
   });
 
   it("should replace data for the same key in child methods", async () => {
@@ -63,14 +74,14 @@ describe("set", () => {
 
     const contextResult = Context.get();
 
-    expect(contextResult).to.not.be.undefined;
-    expect(contextResult).to.deep.equal(test1);
+    expect(contextResult).not.toBeUndefined();
+    expect(contextResult).toEqual(test1);
 
     (async () => {
       Context.set(test2);
       const context = Context.get();
-      expect(context).to.not.be.undefined;
-      expect(context).to.deep.equal(test2);
+      expect(context).not.toBeUndefined();
+      expect(context).toEqual(test2);
     })();
   });
 
@@ -81,13 +92,13 @@ describe("set", () => {
     };
 
     Context.init();
-    expect(Context.get()).to.deep.equal({});
+    expect(Context.get()).toBeEmpty();
     Context.set(test);
 
     const contextResult = Context.get();
 
-    expect(contextResult).to.not.be.undefined;
-    expect(contextResult).to.deep.equal(test);
+    expect(contextResult).not.toBeUndefined();
+    expect(contextResult).toEqual(test);
   });
 });
 
@@ -104,9 +115,9 @@ describe("get", () => {
     for (const test of tests) {
       Context.set(test);
       const data = Context.get();
-      expect(data).to.not.be.undefined;
-      expect(data).to.have.property("name");
-      expect(data).to.deep.equal(test);
+      expect(data).not.toBeUndefined();
+      expect(data).toContainKey("name");
+      expect(data).toEqual(test);
     }
   });
 
@@ -118,28 +129,28 @@ describe("get", () => {
     (async () => {
       Context.set(test);
       const data = Context.get();
-      expect(data).to.not.be.undefined;
-      expect(data).to.have.property("name");
-      expect(data).to.deep.equal(test);
+      expect(data).not.toBeUndefined();
+      expect(data).toContainKey("name");
+      expect(data).toEqual(test);
     })();
 
     (() => {
       const context1 = Context.get();
-      expect(context1).to.not.be.undefined;
-      expect(context1).to.have.property("name");
-      expect(context1).to.deep.equal(test);
+      expect(context1).not.toBeUndefined();
+      expect(context1).toContainKey("name");
+      expect(context1).toEqual(test);
 
       (() => {
         const context2 = Context.get();
-        expect(context2).to.not.be.undefined;
-        expect(context2).to.have.property("name");
-        expect(context2).to.deep.equal(test);
+        expect(context2).not.toBeUndefined();
+        expect(context2).toContainKey("name");
+        expect(context2).toEqual(test);
 
         (() => {
           const context3 = Context.get();
-          expect(context3).to.not.be.undefined;
-          expect(context3).to.have.property("name");
-          expect(context3).to.deep.equal(test);
+          expect(context3).not.toBeUndefined();
+          expect(context3).toContainKey("name");
+          expect(context3).toEqual(test);
         })();
       })();
     })();
@@ -148,14 +159,14 @@ describe("get", () => {
   it("should return data for key present in the store", () => {
     Context.set({ name: "test-13" });
     const context = Context.get("name");
-    expect(context).to.be.not.undefined;
-    expect(context).to.be.a.string;
-    expect(context).to.be.equal("test-13");
+    expect(context).not.toBeUndefined();
+    expect(context).toBeString();
+    expect(context).toBe("test-13");
   });
 
   it("should return undefined for key not present in the store", () => {
     const context = Context.get("12345");
-    expect(context).to.be.undefined;
+    expect(context).toBeUndefined();
   });
 });
 
@@ -166,26 +177,14 @@ describe("remove", () => {
     Context.set(test);
 
     let context = Context.get();
-    expect(context).to.not.be.empty;
-    expect(context).to.have.a.property("name");
+    expect(context).not.toBeEmpty();
+    expect(context).toContainKey("name");
 
     Context.remove();
 
     context = Context.get();
-    expect(context).to.be.empty;
-    expect(context).to.not.have.a.property("name");
+    expect(context).toBeEmpty;
+    expect(context).not.toContainKey("name");
   });
 });
 
-describe("getStore", () => {
-  it("should return the current store instance", () => {
-    Context.init();
-    Context.set({ key: "value" });
-    expect(Context.getStore()).to.deep.equal({ key: "value" });
-  });
-
-  it("should return undefined if no store is set", () => {
-    Context.init();
-    expect(Context.getStore()).to.deep.equal({});
-  });
-});

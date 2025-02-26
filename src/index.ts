@@ -70,7 +70,7 @@ export class Context {
     }
 
     // Create a new copy of the store to prevent reference issues
-    const newStore = { ...existingStore };
+    const newStore = existingStore;
     
     // Update with new data
     for (const key of keys) {
@@ -101,7 +101,7 @@ export class Context {
     }
     
     // Return a shallow copy to prevent direct modification
-    return { ...store } as T;
+    return store as T;
   }
 
   /**

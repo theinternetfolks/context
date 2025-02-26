@@ -1,6 +1,6 @@
 {
   "name": "@theinternetfolks/context",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Library to help you create a context that can be used to reference data, without prop drilling, in Node-based environments.",
   "types": "dist/index.d.ts",
   "scripts": {
