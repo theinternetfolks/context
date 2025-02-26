@@ -1,7 +1,9 @@
+coverage/
 src/
 tests/
-coverage/
-tsconfig.json
-yarn.lock
-.gitignore
 _config.yml
+.gitignore
+.npmignore
+CNAME
+pnpm-lock.yaml
+tsconfig.json

@@ -2,9 +2,14 @@
   "compilerOptions": {
     "target": "es5",
     "module": "commonjs",
-    "sourceMap": true,
-    "rootDir": "src/",
-    "outDir": "./"
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "sourceMap": false,
+    "rootDir": "./src",
+    "outDir": "./dist"
   },
-  "exclude": ["./tests"]
+  "exclude": [
+    "./tests",
+    "./node_modules"
+  ]
 }
